@@ -13,7 +13,7 @@ export const getAddProduct = (req, res) => {
   });
 };
 
-export const postAddProduct = (req, res) => {
+export const postAddProduct = (req, res, next) => {
   const { title, description, imageUrl, price } = req.body;
 
   const errors = validationResult(req);
@@ -43,7 +43,10 @@ export const postAddProduct = (req, res) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err);
+      // res.redirect("/500");
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -74,7 +77,7 @@ export const getEditProduct = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-export const postEditProduct = (req, res) => {
+export const postEditProduct = (req, res, next) => {
   const { productId, title, description, price, imageUrl } = req.body;
 
   const errors = validationResult(req);
@@ -108,10 +111,13 @@ export const postEditProduct = (req, res) => {
 
     .catch((err) => {
       console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
-export const getAdminProducts = (req, res) => {
+export const getAdminProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {
@@ -121,7 +127,9 @@ export const getAdminProducts = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 

@@ -5,3 +5,10 @@ export const get404 = (req, res) => {
     isAuthenticated: req.session.isLoggedIn,
   });
 };
+export const get500 = (req, res) => {
+  res.render("500", {
+    title: "Error",
+    path: "/500",
+    isAuthenticated: req.session.isLoggedIn,
+  });
+};
