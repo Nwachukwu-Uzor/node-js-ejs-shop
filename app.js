@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 import connectMongodbSession from "connect-mongodb-session";
 import csrf from "csurf";
 import flash from "connect-flash";
-import dotenv from "dotenv";
 
 import { get404 } from "./src/controllers/error.controller.js";
 import User from "./src/models/user.js";
@@ -13,10 +12,9 @@ import adminRoute from "./src/routes/admin.route.js";
 import shopRoute from "./src/routes/shop.route.js";
 import authRoute from "./src/routes/auth.route.js";
 
-dotenv.config();
+import { mongoDbUri } from "./config/configs.js";
 
-const MONGODB_URI =
-  "mongodb+srv://uzor:lgCiuWjm5P7qTw9W@cluster0.4p5te.mongodb.net/shop?retryWrites=true&w=majority";
+const MONGODB_URI = mongoDbUri;
 const app = express();
 const __dirname = path.resolve();
 

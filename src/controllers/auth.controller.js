@@ -5,9 +5,7 @@ import nodemailer from "nodemailer";
 import sendgridTransport from "nodemailer-sendgrid-transport";
 import { validationResult } from "express-validator";
 
-import keys from "../../config/configs.js";
-
-const { sendgridApiKey, sendgridEmail } = keys;
+import { sendgridApiKey, sendgridEmail } from "../../config/configs.js";
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
@@ -144,7 +142,7 @@ export const postReset = (req, res) => {
         user.resetTokenExpiration = Date.now() + 3600000;
         return user.save();
       })
-      .then((result) => {
+      .then((_result) => {
         res.redirect("/");
         transporter.sendMail({
           to: email,
