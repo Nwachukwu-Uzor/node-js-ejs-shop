@@ -3,12 +3,16 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import sendgridTransport from "nodemailer-sendgrid-transport";
+import { validationResult } from "express-validator";
+
+import keys from "../../config/configs.js";
+
+const { sendgridApiKey, sendgridEmail } = keys;
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
-      api_key:
-        "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",
+      api_key: sendgridApiKey,
     },
   })
 );
@@ -31,6 +35,12 @@ export const getSignup = (req, res, next) => {
 
 export const postSignup = (req, res) => {
   const { email, password, confirmPassword } = req.body;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty) {
+    return res.status(422).render();
+  }
+
   User.findOne({ email: email })
     .then((userDoc) => {
       if (userDoc) {
@@ -51,7 +61,7 @@ export const postSignup = (req, res) => {
           res.redirect("/login");
           return transporter.sendMail({
             to: email,
-            from: "uzor.nwachukwu@thebulbafrica.institute",
+            from: sendgridEmail,
             subject: "Signup completed",
             html: "<h1>You Successfully Signed UP</h1>",
           });
@@ -138,7 +148,7 @@ export const postReset = (req, res) => {
         res.redirect("/");
         transporter.sendMail({
           to: email,
-          from: "uzor.nwachukwu@thebulbafrica.institute",
+          from: sendgridEmail,
           subject: "Password Reset",
           html: `
             <p>You requested a password reset</p>
