@@ -20,6 +20,8 @@ export const getLogin = (req, res) => {
     path: "/login",
     title: "Login",
     errorMessage: req.flash("error")[0],
+    oldInput: {email: "", password: ""},
+    validationErrors: [],
   });
 };
 
@@ -28,6 +30,12 @@ export const getSignup = (req, res, next) => {
     path: "/signup",
     title: "Signup",
     errorMessage: req.flash("error")[0],
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationErrors: [],
   });
 };
 
@@ -35,40 +43,35 @@ export const postSignup = (req, res) => {
   const { email, password, confirmPassword } = req.body;
   const errors = validationResult(req);
 
-  if (!errors.isEmpty) {
-    return res.status(422).render();
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      title: "Signup",
+      errorMessage: errors.array()[0]?.msg,
+      oldInput: { email, password, confirmPassword },
+      validationErrors: errors.array(),
+    });
   }
 
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash("error", "Email already in use, please pick a different one");
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          const user = new User({
-            email,
-            password: hashedPassword,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((result) => {
-          res.redirect("/login");
-          return transporter.sendMail({
-            to: email,
-            from: sendgridEmail,
-            subject: "Signup completed",
-            html: "<h1>You Successfully Signed UP</h1>",
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      const user = new User({
+        email,
+        password: hashedPassword,
+        cart: { items: [] },
+      });
+      return user.save();
     })
-
+    .then((_result) => {
+      res.redirect("/login");
+      return transporter.sendMail({
+        to: email,
+        from: sendgridEmail,
+        subject: "Signup completed",
+        html: "<h1>You Successfully Signed UP</h1>",
+      });
+    })
     .catch((err) => {
       console.log(err);
     });
@@ -76,6 +79,19 @@ export const postSignup = (req, res) => {
 
 export const postLogin = (req, res) => {
   const { email, password } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      title: "Login",
+      errorMessage: errors.array()[0]?.msg,
+      oldInput: { email, password },
+      validationErrors: errors.array(),
+    });
+  }
+
   User.findOne({ email })
     .then((user) => {
       if (!user) {

@@ -1,21 +1,35 @@
 import Product from "../models/product.js";
+import { validationResult } from "express-validator";
 
 export const getAddProduct = (req, res) => {
-  const { isLoggedIn } = req.session;
-  if (!isLoggedIn) {
-    return res.redirect("/login");
-  }
   res.render("admin/edit-product", {
     title: "Add Product",
     path: "/admin/add-product",
     editing: false,
     product: {},
-    isAuthenticated: isLoggedIn,
+    hasError: false,
+    errorMessage: null,
+    validationErrors: [],
   });
 };
 
 export const postAddProduct = (req, res) => {
   const { title, description, imageUrl, price } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      title: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      product: { title, price, description, imageUrl },
+      hasError: true,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
+
   const product = new Product({
     title,
     price,
@@ -34,10 +48,6 @@ export const postAddProduct = (req, res) => {
 };
 
 export const getEditProduct = (req, res) => {
-  const { isLoggedIn } = req.session;
-  if (!isLoggedIn) {
-    return res.redirect("/login");
-  }
   const { edit } = req.query;
 
   if (!edit) {
@@ -51,12 +61,14 @@ export const getEditProduct = (req, res) => {
       if (!product) {
         return res.redirect("/");
       }
-      res.render("admin/edit-product", {
+      return res.render("admin/edit-product", {
         title: "Add Product",
         path: "/edit/add-product",
         editing: edit,
         product,
-        isAuthenticated: req.session.isLoggedIn,
+        hasError: false,
+        errorMessage: null,
+        validationErrors: [],
       });
     })
     .catch((err) => console.log(err));
@@ -64,6 +76,20 @@ export const getEditProduct = (req, res) => {
 
 export const postEditProduct = (req, res) => {
   const { productId, title, description, price, imageUrl } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render(`admin/edit-product`, {
+      title: "Editing Product",
+      path: "/admin/edit-product",
+      editing: true,
+      product: { title, price, description, imageUrl, _id: productId },
+      hasError: true,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
 
   Product.findById(productId)
     .then((product) => {
@@ -86,17 +112,12 @@ export const postEditProduct = (req, res) => {
 };
 
 export const getAdminProducts = (req, res) => {
-  const { isLoggedIn } = req.session;
-  if (!isLoggedIn) {
-    return res.redirect("/login");
-  }
   Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {
         products,
         title: "Products",
         path: "/admin/products",
-        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -107,7 +128,7 @@ export const getAdminProducts = (req, res) => {
 export const postDeleteProduct = (req, res) => {
   const { productId } = req.body;
 
-  Product.deleteOne({_id: productId, userId: req.user._id})
+  Product.deleteOne({ _id: productId, userId: req.user._id })
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect("/");
