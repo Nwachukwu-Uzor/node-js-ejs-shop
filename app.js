@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import connectMongodbSession from "connect-mongodb-session";
 import csrf from "csurf";
 import flash from "connect-flash";
+import multer from "multer";
 
 import { get404, get500 } from "./src/controllers/error.controller.js";
 import User from "./src/models/user.js";
@@ -18,14 +19,38 @@ const MONGODB_URI = mongoDbUri;
 const app = express();
 const __dirname = path.resolve();
 
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + "-" + file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimeType === "image/png" ||
+    file.mimeType === "image/jpg" ||
+    file.mimeType === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
 const MongobDBStore = connectMongodbSession(session);
 
 const store = new MongobDBStore({ uri: MONGODB_URI, collection: "sessions" });
-
 app.set("view engine", "ejs");
 app.set("views", "src/views");
 
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+);
 app.use(express.urlencoded({ extended: false }));
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
@@ -64,8 +89,6 @@ app.use((req, res, next) => {
     });
 });
 
-
-
 app.use("/admin", adminRoute);
 app.use("/", shopRoute);
 app.use(authRoute);
@@ -78,7 +101,7 @@ app.use((error, req, res, next) => {
   res.render("500", {
     title: "Error",
     path: "/500",
-    isAuthenticated: req.session.isLoggedIn,
+    isAuthenticated: req.session?.isLoggedIn,
   });
 });
 

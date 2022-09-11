@@ -14,7 +14,10 @@ export const getAddProduct = (req, res) => {
 };
 
 export const postAddProduct = (req, res, next) => {
-  const { title, description, imageUrl, price } = req.body;
+  const { title, description, image, price } = req.body;
+
+  const imageUrl = req.file;
+  console.log(req.file)
 
   const errors = validationResult(req);
 
@@ -23,7 +26,7 @@ export const postAddProduct = (req, res, next) => {
       title: "Add Product",
       path: "/admin/add-product",
       editing: false,
-      product: { title, price, description, imageUrl },
+      product: { title, price, description, image },
       hasError: true,
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
@@ -34,7 +37,7 @@ export const postAddProduct = (req, res, next) => {
     title,
     price,
     description,
-    imageUrl,
+    image,
     userId: req.user._id,
   });
   product
@@ -78,7 +81,7 @@ export const getEditProduct = (req, res) => {
 };
 
 export const postEditProduct = (req, res, next) => {
-  const { productId, title, description, price, imageUrl } = req.body;
+  const { productId, title, description, price, image } = req.body;
 
   const errors = validationResult(req);
 
@@ -87,7 +90,7 @@ export const postEditProduct = (req, res, next) => {
       title: "Editing Product",
       path: "/admin/edit-product",
       editing: true,
-      product: { title, price, description, imageUrl, _id: productId },
+      product: { title, price, description, image, _id: productId },
       hasError: true,
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),

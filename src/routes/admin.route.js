@@ -22,7 +22,6 @@ router.post(
     body("title", "title must contain at least 3 alphanumeric characters")
       .isLength({ min: 3 })
       .trim(),
-    body("imageUrl", "Image should have a valid url").isURL(),
     body("price").isFloat(),
     body(
       "description",
@@ -40,7 +39,6 @@ router.post(
     body("title", "title must contain at least 3 alphanumeric characters")
       .isLength({ min: 3 })
       .trim(),
-    body("imageUrl", "Image should have a valid url").isURL(),
     body("price", "price must be a decimal number").isFloat(),
     body(
       "description",
