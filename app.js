@@ -24,15 +24,18 @@ const fileStorage = multer.diskStorage({
     cb(null, "images");
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "-" + file.originalname);
+    cb(
+      null,
+      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
+    );
   },
 });
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimeType === "image/png" ||
-    file.mimeType === "image/jpg" ||
-    file.mimeType === "image/jpeg"
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
   ) {
     cb(null, true);
   } else {
@@ -52,6 +55,7 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(
   session({
@@ -98,6 +102,7 @@ app.get("/500", get500);
 app.use(get404);
 
 app.use((error, req, res, next) => {
+  console.log(error);
   res.render("500", {
     title: "Error",
     path: "/500",

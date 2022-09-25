@@ -10,7 +10,7 @@
         <% if (errorMessage) { %>
             <div class="user-message user-message--error"><%= errorMessage %></div>
         <%  } %>
-        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
+        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype='multipart/form-data'>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
             <div class="form-control">
                 <label for="title">Title</label>
@@ -22,17 +22,7 @@
                     class="<%= validationErrors.find(e => e.param === 'title') && 'invalid' %>"
                 > 
             </div>
-            <!-- <div class="form-control">
-                <label for="imageUrl">Image URL</label>
-                <input 
-                    type="text" 
-                    name="imageUrl" 
-                    id="imageUrl" 
-                    value="
-                    <% if (editing || hasError) { %><%= product.imageUrl %><% } %>"
-                    class="<%= validationErrors.find(e => e.param === 'imageUrl') && 'invalid' %>"
-                >
-            </div> -->
+            </div>
             <div class="form-control">
                 <label for="image">Image</label>
                 <input 
@@ -59,8 +49,7 @@
                     id="description" 
                     rows="5"
                     class="<%= validationErrors.find(e => e.param === 'description') && 'invalid' %>"
-                ><% if (editing || hasError) { %><%= product.description %><% } %>
-                </textarea>
+                ><% if (editing || hasError) { %><%= product.description %><% } %></textarea>
             </div>
             <% if (editing) { %>
                 <input type="hidden" value="<%= product._id %>" name="productId">

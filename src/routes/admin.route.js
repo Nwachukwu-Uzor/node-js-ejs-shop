@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import {
   getAddProduct,
   getAdminProducts,
@@ -30,8 +31,10 @@ router.post(
       .isLength({ min: 5, max: 400 })
       .trim(),
   ],
+
   postAddProduct
 );
+
 router.post(
   "/edit-product",
   isAuth,
