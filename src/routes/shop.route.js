@@ -4,6 +4,7 @@ import {
   getCart,
   //   // getCheckout,
   getIndexPage,
+  getInvoice,
   getOrders,
   getProduct,
   getProducts,
@@ -21,8 +22,9 @@ router.get("/products/:productId", getProduct);
 router.get("/cart", isAuth, getCart);
 router.post("/cart", isAuth, addToCart);
 // // router.get("/checkout", getCheckout);
-router.get("/orders", isAuth, getOrders);
 router.post("/cart-delete-item", isAuth, postCartDeleteProduct);
-router.post("/create-order", isAuth,postCreateOrder);
+router.post("/create-order", isAuth, postCreateOrder);
+router.get("/orders/:orderId", isAuth, getInvoice);
+router.get("/orders", isAuth, getOrders);
 
 export default router;

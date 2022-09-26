@@ -1,5 +1,6 @@
 import Product from "../models/product.js";
 import { validationResult } from "express-validator";
+import { deleteFile } from "../utils/file.js";
 
 export const getAddProduct = (req, res) => {
   res.render("admin/edit-product", {
@@ -120,6 +121,7 @@ export const postEditProduct = (req, res, next) => {
       product.description = description;
       product.price = price;
       if (image) {
+        deleteFile(product.imageUrl);
         product.imageUrl = image.path.replace(/\\/g, "/");
       }
 
@@ -152,15 +154,23 @@ export const getAdminProducts = (req, res, next) => {
     });
 };
 
-export const postDeleteProduct = (req, res) => {
+export const postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
 
-  Product.deleteOne({ _id: productId, userId: req.user._id })
+  Product.findById(productId)
     .then((product) => {
+      if (!product) {
+        return next(new Error("Product not found"));
+      }
       if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect("/");
       }
+      deleteFile(product.imageUrl);
+      return Product.deleteOne({ _id: productId, userId: req.user._id });
+    })
+    .then(() => {
+    
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => next(err));
 };
